@@ -5,6 +5,7 @@ import { Money } from '@/domain/value-objects/money.vo';
 import { SubscriptionRepository } from '@/domain/repositories/subscription.repository';
 import { PaymentGateway, SubscriptionRequest } from '@/domain/gateways/payment-gateway.interface';
 import { SubscriptionCreatedEvent } from '@/domain/events/subscription.events';
+import { EventService } from '@/infrastructure/events/event.service';
 import { v4 as uuid } from 'uuid';
 
 export interface CreateSubscriptionCommand {
@@ -23,7 +24,8 @@ export class CreateSubscriptionUseCase {
   constructor(
     @Inject('SubscriptionRepository') private readonly subscriptionRepository: SubscriptionRepository,
     @Inject('PaymentGateway') private readonly paymentGateway: PaymentGateway,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly eventService: EventService
   ) {}
 
   async execute(command: CreateSubscriptionCommand): Promise<Subscription> {
@@ -65,6 +67,16 @@ export class CreateSubscriptionUseCase {
         savedSubscription.amount.amount
       )
     );
+
+    // Publish to KeyDB
+    await this.eventService.publishSubscriptionEvent({
+      type: 'subscription.created',
+      subscriptionId: savedSubscription.id,
+      applicationId: savedSubscription.applicationId,
+      customerId: savedSubscription.customerId,
+      amount: savedSubscription.amount.amount,
+      timestamp: new Date().toISOString(),
+    });
 
     return savedSubscription;
   }

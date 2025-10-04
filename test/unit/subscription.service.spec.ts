@@ -3,6 +3,7 @@ import { SubscriptionService } from '@/application/services/subscription.service
 import { SubscriptionRepository } from '@/domain/repositories/subscription.repository';
 import { Subscription, SubscriptionStatus, BillingCycle } from '@/domain/entities/subscription.entity';
 import { Money } from '@/domain/value-objects/money.vo';
+import { EventService } from '@/infrastructure/events/event.service';
 
 describe('SubscriptionService', () => {
   let service: SubscriptionService;
@@ -30,12 +31,21 @@ describe('SubscriptionService', () => {
       save: jest.fn(),
     };
 
+    const mockEventService = {
+      publishPaymentEvent: jest.fn(),
+      publishSubscriptionEvent: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SubscriptionService,
         {
           provide: 'SubscriptionRepository',
           useValue: mockRepository,
+        },
+        {
+          provide: EventService,
+          useValue: mockEventService,
         },
       ],
     }).compile();

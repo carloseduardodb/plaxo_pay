@@ -4,6 +4,7 @@ import { CreatePaymentUseCase } from '@/application/use-cases/create-payment.use
 import { PaymentRepository } from '@/domain/repositories/payment.repository';
 import { PaymentGateway } from '@/domain/gateways/payment-gateway.interface';
 import { PaymentMethod } from '@/domain/entities/payment.entity';
+import { EventService } from '@/infrastructure/events/event.service';
 
 describe('CreatePaymentUseCase', () => {
   let useCase: CreatePaymentUseCase;
@@ -33,6 +34,11 @@ describe('CreatePaymentUseCase', () => {
       emitAsync: jest.fn(),
     };
 
+    const mockEventService = {
+      publishPaymentEvent: jest.fn(),
+      publishSubscriptionEvent: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreatePaymentUseCase,
@@ -47,6 +53,10 @@ describe('CreatePaymentUseCase', () => {
         {
           provide: EventEmitter2,
           useValue: mockEventEmitter,
+        },
+        {
+          provide: EventService,
+          useValue: mockEventService,
         },
       ],
     }).compile();

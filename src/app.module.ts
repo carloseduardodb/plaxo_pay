@@ -37,6 +37,9 @@ import { ApplicationController } from './interfaces/controllers/application.cont
 // Auth
 import { AuthModule } from './auth/auth.module';
 
+// Events
+import { EventModule } from './infrastructure/events/event.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -60,6 +63,7 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forFeature([ApplicationEntity, PaymentEntity, SubscriptionEntity]),
     EventEmitterModule.forRoot(),
     AuthModule,
+    EventModule,
   ],
   controllers: [PaymentController, SubscriptionController, ApplicationController],
   providers: [

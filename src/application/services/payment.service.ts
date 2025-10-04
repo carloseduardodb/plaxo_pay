@@ -1,10 +1,14 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { PaymentRepository } from '@/domain/repositories/payment.repository';
 import { Payment, PaymentStatus } from '@/domain/entities/payment.entity';
+import { EventService } from '@/infrastructure/events/event.service';
 
 @Injectable()
 export class PaymentService {
-  constructor(@Inject('PaymentRepository') private readonly paymentRepository: PaymentRepository) {}
+  constructor(
+    @Inject('PaymentRepository') private readonly paymentRepository: PaymentRepository,
+    private readonly eventService: EventService
+  ) {}
 
   async getPaymentById(id: string): Promise<Payment | null> {
     return this.paymentRepository.findById(id);
@@ -42,6 +46,31 @@ export class PaymentService {
         throw new Error('Invalid status transition');
     }
 
-    return this.paymentRepository.update(updatedPayment);
+    const result = await this.paymentRepository.update(updatedPayment);
+
+    // Publish event
+    if (status === PaymentStatus.APPROVED) {
+      await this.eventService.publishPaymentEvent({
+        type: 'payment.approved',
+        paymentId: result.id,
+        applicationId: result.applicationId,
+        customerId: result.metadata?.customerId || '',
+        amount: result.amount.amount,
+        subscriptionId: result.subscriptionId,
+        timestamp: new Date().toISOString(),
+      });
+    } else if (status === PaymentStatus.REJECTED) {
+      await this.eventService.publishPaymentEvent({
+        type: 'payment.rejected',
+        paymentId: result.id,
+        applicationId: result.applicationId,
+        customerId: result.metadata?.customerId || '',
+        amount: result.amount.amount,
+        subscriptionId: result.subscriptionId,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    return result;
   }
 }

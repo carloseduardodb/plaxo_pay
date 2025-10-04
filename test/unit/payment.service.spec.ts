@@ -3,6 +3,7 @@ import { PaymentService } from '@/application/services/payment.service';
 import { PaymentRepository } from '@/domain/repositories/payment.repository';
 import { Payment, PaymentStatus, PaymentMethod } from '@/domain/entities/payment.entity';
 import { Money } from '@/domain/value-objects/money.vo';
+import { EventService } from '@/infrastructure/events/event.service';
 
 describe('PaymentService', () => {
   let service: PaymentService;
@@ -28,12 +29,21 @@ describe('PaymentService', () => {
       findByExternalId: jest.fn(),
     };
 
+    const mockEventService = {
+      publishPaymentEvent: jest.fn(),
+      publishSubscriptionEvent: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PaymentService,
         {
           provide: 'PaymentRepository',
           useValue: mockRepository,
+        },
+        {
+          provide: EventService,
+          useValue: mockEventService,
         },
       ],
     }).compile();
