@@ -1,0 +1,143 @@
+### Variables
+@baseUrl = http://localhost:3001
+@token = {{login.response.body.access_token}}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Create Payment - PIX
+POST {{baseUrl}}/payments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "applicationId": "550e8400-e29b-41d4-a716-446655440000",
+  "amount": 100.50,
+  "currency": "BRL",
+  "method": "pix",
+  "description": "Compra de produto teste",
+  "customerId": "customer_001",
+  "metadata": {
+    "orderId": "order_123",
+    "productId": "prod_456"
+  }
+}
+
+### Create Payment - Credit Card
+POST {{baseUrl}}/payments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "applicationId": "550e8400-e29b-41d4-a716-446655440000",
+  "amount": 299.90,
+  "currency": "BRL",
+  "method": "credit_card",
+  "description": "Assinatura Premium",
+  "customerId": "customer_002"
+}
+
+### Get Payment by ID
+GET {{baseUrl}}/payments/550e8400-e29b-41d4-a716-446655440001
+Authorization: Bearer {{token}}
+
+### Get Payments by Application
+GET {{baseUrl}}/payments/application/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{token}}
+
+### Get Payments by Application with Status Filter
+GET {{baseUrl}}/payments/application/550e8400-e29b-41d4-a716-446655440000?status=approved
+Authorization: Bearer {{token}}
+
+### Create Subscription - Monthly
+POST {{baseUrl}}/subscriptions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "applicationId": "550e8400-e29b-41d4-a716-446655440000",
+  "planName": "Plano Básico",
+  "amount": 29.90,
+  "currency": "BRL",
+  "billingCycle": "monthly",
+  "customerId": "customer_003",
+  "metadata": {
+    "features": ["basic_support", "5gb_storage"]
+  }
+}
+
+### Create Subscription - Yearly
+POST {{baseUrl}}/subscriptions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "applicationId": "550e8400-e29b-41d4-a716-446655440000",
+  "planName": "Plano Enterprise",
+  "amount": 999.90,
+  "currency": "BRL",
+  "billingCycle": "yearly",
+  "customerId": "customer_004",
+  "startDate": "2024-01-01T00:00:00.000Z"
+}
+
+### Get Subscription by ID
+GET {{baseUrl}}/subscriptions/550e8400-e29b-41d4-a716-446655440002
+Authorization: Bearer {{token}}
+
+### Get Subscriptions by Application
+GET {{baseUrl}}/subscriptions/application/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{token}}
+
+### Get Active Subscriptions by Application
+GET {{baseUrl}}/subscriptions/application/550e8400-e29b-41d4-a716-446655440000?status=active
+Authorization: Bearer {{token}}
+
+### Get Subscriptions by Customer
+GET {{baseUrl}}/subscriptions/customer/customer_003
+Authorization: Bearer {{token}}
+
+### Cancel Subscription
+PUT {{baseUrl}}/subscriptions/550e8400-e29b-41d4-a716-446655440002/cancel
+Authorization: Bearer {{token}}
+
+### Suspend Subscription
+PUT {{baseUrl}}/subscriptions/550e8400-e29b-41d4-a716-446655440002/suspend
+Authorization: Bearer {{token}}
+
+### Get Subscriptions Due for Renewal
+GET {{baseUrl}}/subscriptions/renewals/due
+Authorization: Bearer {{token}}
+
+### Get Payments by Subscription
+GET {{baseUrl}}/payments/subscription/550e8400-e29b-41d4-a716-446655440002
+Authorization: Bearer {{token}}
+
+### Create Application
+POST {{baseUrl}}/applications
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Test Application",
+  "apiKey": "test_api_key_123",
+  "isActive": true
+}
+
+### List All Applications
+GET {{baseUrl}}/applications
+Authorization: Bearer {{token}}
+
+### Get Application by ID
+GET {{baseUrl}}/applications/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{token}}
+
+### Test Unauthorized Access (without token)
+GET {{baseUrl}}/payments
